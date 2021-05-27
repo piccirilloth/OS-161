@@ -38,6 +38,7 @@
 
 #include <spinlock.h>
 #include "opt-lab4.h"
+#define N_PROC 100
 
 struct addrspace;
 struct thread;
@@ -60,6 +61,8 @@ struct vnode;
  * thread_switch needs to be able to fetch the current address space
  * without sleeping.
  */
+
+
 struct proc {
 	char *p_name;			/* Name of this process */
 	struct spinlock p_lock;		/* Lock for this structure */
@@ -75,6 +78,7 @@ struct proc {
 	#if OPT_LAB4
 	struct semaphore *proc_semaphore;
 	int exitStatus;
+	int pid;
 	#endif
 };
 
@@ -104,6 +108,7 @@ struct addrspace *proc_setas(struct addrspace *);
 
 #if OPT_LAB4
 int proc_wait(struct proc *p);
+struct proc *getProc(int pid);
 #endif
 
 

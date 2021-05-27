@@ -44,6 +44,9 @@
 #include "opt-sfs.h"
 #include "opt-net.h"
 #include "opt-lab4.h"
+#if OPT_LAB4
+#include <proc_syscalls.h>
+#endif
 
 /*
  * In-kernel menu and command dispatcher.
@@ -137,7 +140,11 @@ common_prog(int nargs, char **args)
 	 * once you write the code for handling that.
 	 */
 	#if OPT_LAB4
-	int exit_code = proc_wait(proc);
+	//int exit_code = proc_wait(proc);
+	int exit_code, ret;
+	int pid = sys_getpid(proc);
+	ret = sys_waitpid(pid, &exit_code);
+	(void) ret;
 	kprintf("the proccess ended with status = %d\n", exit_code);
 	#endif
 

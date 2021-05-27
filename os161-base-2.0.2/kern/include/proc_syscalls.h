@@ -4,6 +4,8 @@
 #if OPT_PROC_SYSCALLS
 
 void sys__exit(int status);
+int sys_waitpid(int pid, int *status);
+int sys_getpid(struct proc *proc);
 
 #endif
 #endif

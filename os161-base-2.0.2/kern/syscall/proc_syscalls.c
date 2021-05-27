@@ -18,20 +18,41 @@
 
 void sys__exit(int status)
 {
-	struct addrspace *ad;
-
 	#if OPT_LAB4
 	struct proc *proc = curproc;
-	spinlock_acquire(&proc->p_lock);
-	curproc->exitStatus = status;
-	V(proc->proc_semaphore);
+	struct thread *cur = curthread;
+	proc_remthread(cur); //before to signal the and of the process remove the thread from the process
+	spinlock_acquire(&proc->p_lock); //not needed in this case
+	proc->exitStatus = status;
 	spinlock_release(&proc->p_lock);
-	#endif
+	V(proc->proc_semaphore);
+	#else
+	struct addrspace *ad;
 	//sys_write(1, "exit with sys__exit\n", 20);
 	ad = proc_getas();
 	as_destroy(ad);
-	thread_exit();
-	panic("thread exit returned, should not happen");
 	(void) status;
+	#endif
+	thread_exit();
+	
+	panic("thread exit returned, should not happen");
 	return;
 }
+
+
+#if OPT_LAB4
+int sys_waitpid(int pid, int *status) {
+	//KASSERT(process_table.vect[pid] != NULL);
+	struct proc *p = getProc(pid);
+	KASSERT(p != NULL);
+	int pidRet = pid;
+	int stat = proc_wait(p);
+	*status = stat;
+	return pidRet;
+}
+
+int sys_getpid(struct proc *proc) {
+	return proc->pid;
+}
+#endif
+

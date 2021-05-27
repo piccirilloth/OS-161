@@ -55,6 +55,15 @@
  */
 struct proc *kproc;
 
+#if OPT_LAB4
+/* vector that contain for each process the corresponding PID */
+static struct _process_table {
+	struct proc *vect[N_PROC];
+	struct spinlock lock;
+} process_table;
+#endif
+
+
 /*
  * Create a proc structure.
  */
@@ -86,6 +95,20 @@ proc_create(const char *name)
 	#if OPT_LAB4
 	proc->proc_semaphore = sem_create("proc_sem", 0);
 	proc->exitStatus = -1;
+	int i;
+	bool find = false;
+	spinlock_acquire(&process_table.lock);
+	for(i=0; i<N_PROC && find==false; i++) {
+		if(process_table.vect[i] == NULL)
+		{
+			find = true;
+			proc->pid = i;
+			process_table.vect[i] = proc;
+		}
+ 	}
+	if(find == false)
+		panic("proc table is full\n");
+	spinlock_release(&process_table.lock);
 	#endif
 
 	return proc;
@@ -176,6 +199,9 @@ proc_destroy(struct proc *proc)
 
 	#if OPT_LAB4
 	sem_destroy(proc->proc_semaphore);
+	spinlock_acquire(&process_table.lock);
+	process_table.vect[proc->pid] = NULL;
+	spinlock_release(&process_table.lock);
 	#endif
 
 	kfree(proc->p_name);
@@ -188,6 +214,12 @@ proc_destroy(struct proc *proc)
 void
 proc_bootstrap(void)
 {
+	#if OPT_LAB4
+	int i;
+	spinlock_init(&process_table.lock);
+	for(i=0; i<N_PROC; i++)
+		process_table.vect[i] = NULL;
+	#endif
 	kproc = proc_create("[kernel]");
 	if (kproc == NULL) {
 		panic("proc_create for kproc failed\n");
@@ -332,6 +364,17 @@ proc_setas(struct addrspace *newas)
 #if OPT_LAB4
 int proc_wait(struct proc *p) {
 	P(p->proc_semaphore); //wait on the semaphore's process we want to wait
-	return p->exitStatus;
+	int ret = p->exitStatus;
+	proc_destroy(p);
+	return ret;
+}
+
+struct proc *getProc(int pid) {
+	spinlock_acquire(&process_table.lock);
+	if(process_table.vect[pid] == NULL)
+		return NULL;
+	struct proc *p = process_table.vect[pid];
+	spinlock_release(&process_table.lock);
+	return p;
 }
 #endif

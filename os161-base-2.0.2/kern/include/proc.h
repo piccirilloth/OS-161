@@ -37,7 +37,10 @@
  */
 
 #include <spinlock.h>
+#include <limits.h>
+#include "file_syscalls.h"
 #include "opt-lab4.h"
+#include "opt-lab5.h"
 #define N_PROC 100
 
 struct addrspace;
@@ -79,6 +82,10 @@ struct proc {
 	struct semaphore *proc_semaphore;
 	int exitStatus;
 	int pid;
+	#endif
+
+	#if OPT_LAB5
+	struct openfile openFileTable[OPEN_MAX];
 	#endif
 };
 

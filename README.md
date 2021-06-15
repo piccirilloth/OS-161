@@ -4,4 +4,4 @@ This is a version of OS-161 (2.0.2) used in the laboratories of the course "Prog
 * Lab2: write a first version of write, read, exit syscalls and a contiguous mamory allocator with a simple free-space management
 * Lab3: create a larger support to synchronization with the implementation of locks and condition variables using semaphores, wchan and spinlocks
 * Lab4: create a support to waitpid and handle the exit status of a process
-* LAB5: TODO
+* LAB5: implement support for opening and close files and complete the implementation of sys_read and sys_write that now support files
